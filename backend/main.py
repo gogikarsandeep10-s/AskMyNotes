@@ -10,14 +10,13 @@ app = FastAPI(
 )
 
 
-# React runs on port 5173.
-# FastAPI runs on port 8000.
-# Since these are different origins, CORS permission is required.
+# Allow both local React and deployed React frontend
 app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173",
         "http://127.0.0.1:5173",
+        "https://askmynotes-web.onrender.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],
@@ -25,15 +24,18 @@ app.add_middleware(
 )
 
 
+# Request format
 class QuestionRequest(BaseModel):
     question: str
 
 
+# Response format
 class QuestionResponse(BaseModel):
     question: str
     answer: str
 
 
+# Home page
 @app.get("/")
 def home():
     return {
@@ -41,6 +43,7 @@ def home():
     }
 
 
+# Health check
 @app.get("/health")
 def health_check():
     return {
@@ -48,17 +51,21 @@ def health_check():
     }
 
 
+# Ask question
 @app.post("/ask", response_model=QuestionResponse)
 def ask_question(request: QuestionRequest):
+
     cleaned_question = request.question.strip()
 
+    # Check if question is empty
     if not cleaned_question:
         return QuestionResponse(
             question="",
             answer="Please enter a question.",
         )
 
+    # Return the received question
     return QuestionResponse(
         question=cleaned_question,
-        answer=f'Your question "{cleaned_question}" was received successfully.',
+        answer=f"{cleaned_question} message received",
     )
