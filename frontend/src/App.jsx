@@ -10,43 +10,53 @@ function App() {
   const askQuestion = async () => {
     const cleanedQuestion = question.trim();
 
+    // Check whether the user entered a question
     if (!cleanedQuestion) {
       setError("Please enter a question.");
       setAnswer("");
       return;
     }
 
+    // Start loading
     setLoading(true);
     setError("");
     setAnswer("");
 
     try {
-      const response = await fetch("https://askmynotes-backend-a2ub.onrender.com/", {
-        method: "POST",
+      // Connect to the deployed FastAPI backend
+      const response = await fetch(
+        "https://askmynotes-backend-a2ub.onrender.com/ask",
+        {
+          method: "POST",
 
-        headers: {
-          "Content-Type": "application/json",
-        },
+          headers: {
+            "Content-Type": "application/json",
+          },
 
-        body: JSON.stringify({
-          question: cleanedQuestion,
-        }),
-      });
+          body: JSON.stringify({
+            question: cleanedQuestion,
+          }),
+        }
+      );
 
+      // Check whether the backend responded successfully
       if (!response.ok) {
         throw new Error(`Backend returned status ${response.status}`);
       }
 
+      // Convert backend response into JSON
       const data = await response.json();
 
+      // Display the backend answer
       setAnswer(data.answer);
     } catch (err) {
-      console.error(err);
+      console.error("Backend connection error:", err);
 
       setError(
         "Unable to connect to the backend. Check whether the FastAPI container is running."
       );
     } finally {
+      // Stop loading
       setLoading(false);
     }
   };
